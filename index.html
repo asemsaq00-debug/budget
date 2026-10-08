@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متتبع الميزانية والتفاصيل الذكي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-4 sm:p-6">
+
+    <div class="max-w-5xl mx-auto space-y-6">
+        
+        <!-- عنوان التطبيق -->
+        <header class="text-center bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
+            <h1 class="text-2xl sm:text-3xl font-bold text-emerald-400">💰 متتبع الميزانية والتفاصيل الشهري</h1>
+            <p class="text-gray-400 text-sm mt-1">الميزانية الكلية: <span class="text-white font-bold">4,990 ر.س</span> | تابع حدودك وتفاصيل منتجاتك لكل قسم</p>
+        </header>
+
+        <!-- لوحة الملخص السريع -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow">
+                <p class="text-gray-400 text-sm">إجمالي الميزانية</p>
+                <h2 class="text-xl font-bold text-white mt-1">4,990.00 ر.س</h2>
+            </div>
+            <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow">
+                <p class="text-gray-400 text-sm">إجمالي المصروف المسجل</p>
+                <h2 id="totalAmount" class="text-xl font-bold text-emerald-400 mt-1">0.00 ر.س</h2>
+            </div>
+            <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow">
+                <p class="text-gray-400 text-sm">إجمالي المدخرات</p>
+                <h2 id="totalSavings" class="text-xl font-bold text-amber-400 mt-1">0.00 ر.س</h2>
+            </div>
+            <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow">
+                <p class="text-gray-400 text-sm">المتبقي الحر للصرف</p>
+                <h2 id="remainingBudget" class="text-xl font-bold text-blue-400 mt-1">4,990.00 ر.س</h2>
+            </div>
+        </div>
+
+        <!-- قسم التحكم بالادخار -->
+        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h2 class="text-lg font-semibold text-amber-300">🎯 حصالة الادخار الشهرية</h2>
+                <p class="text-xs text-gray-400 mt-0.5">حدد المبلغ المستهدف ادخاره هذا الشهر.</p>
+            </div>
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <div>
+                    <label class="block text-[10px] text-gray-400 mb-1">الهدف الادخاري الشهري (ر.س)</label>
+                    <input type="number" id="savingsGoalInput" value="500" onchange="updateSavingsGoal()" 
+                        class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-white w-36 text-center focus:outline-none focus:border-amber-500 font-bold">
+                </div>
+            </div>
+        </div>
+
+        <!-- نموذج الإدخال -->
+        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
+            <h2 class="text-lg font-semibold mb-4 text-emerald-300">➕ إضافة مصروف أو عملية ادخار</h2>
+            <form id="expenseForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">اسم المنتج / الوصف</label>
+                    <input type="text" id="itemName" required placeholder="مثال: تعبئة بنزين، عشاء..." 
+                        class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">المبلغ (ر.س)</label>
+                    <input type="number" step="0.01" id="itemPrice" required placeholder="0.00" 
+                        class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">التصنيف</label>
+                    <select id="itemCategory" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+                        <option value="ادخار وحصالة">💵 ادخار وحصالة</option>
+                        <option value="أقساط جوال">📱 أقساط جوال</option>
+                        <option value="نت">🌐 نت</option>
+                        <option value="نادي (اشتراك)">🏋️ نادي (اشتراك)</option>
+                        <option value="ليزر">✨ ليزر</option>
+                        <option value="بنزين">⛽ بنزين</option>
+                        <option value="مستلزمات نادي">⚡ مستلزمات نادي</option>
+                        <option value="مقاضي دايت">🥗 مقاضي دايت</option>
+                        <option value="مطاعم وكوفيات">🍔 مطاعم وكوفيات</option>
+                        <option value="ترفيه">🎮 ترفيه</option>
+                        <option value="حلاقة">✂️ حلاقة</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 rounded-lg transition shadow">
+                        حفظ العملية
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- قسم تفاصيل التصنيفات -->
+        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
+            <h2 class="text-lg font-semibold mb-4 text-emerald-300">📂 تفاصيل المصروفات والمنتجات حسب كل قسم</h2>
+            <div id="categoryLimitsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- تعبئة تلقائية عبر JS -->
+            </div>
+        </div>
+
+        <!-- السجل العام -->
+        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-lg font-semibold text-emerald-300">📜 السجل العام للعمليات</h2>
+                <button onclick="clearAllData()" class="text-xs bg-red-600/20 text-red-400 border border-red-600/40 px-3 py-1.5 rounded-lg hover:bg-red-600 hover:text-white transition">
+                    حذف كل البيانات
+                </button>
+            </div>
+            <p class="text-xs text-gray-400">جميع العمليات مرتبة حسب الأحدث.</p>
+        </div>
+
+    </div>
+
+    <script>
+        let categoriesConfig = {
+            "ادخار وحصالة": { limit: 500, icon: "💵" },
+            "أقساط جوال": { limit: 1000, icon: "📱" },
+            "نت": { limit: 85, icon: "🌐" },
+            "نادي (اشتراك)": { limit: 226, icon: "🏋️" },
+            "ليزر": { limit: 126, icon: "✨" },
+            "بنزين": { limit: 450, icon: "⛽" },
+            "مستلزمات نادي": { limit: 500, icon: "⚡" },
+            "مقاضي دايت": { limit: 1000, icon: "🥗" },
+            "مطاعم وكوفيات": { limit: 600, icon: "🍔" },
+            "ترفيه": { limit: 300, icon: "🎮" },
+            "حلاقة": { limit: 203, icon: "✂️" }
+        };
+
+        let expenses = JSON.parse(localStorage.getItem('my_custom_expenses_v4')) || [];
+        let savingsGoal = parseFloat(localStorage.getItem('my_savings_goal_v4')) || 500;
+        document.getElementById('savingsGoalInput').value = savingsGoal;
+        categoriesConfig["ادخار وحصالة"].limit = savingsGoal;
+
+        const form = document.getElementById('expenseForm');
+        const totalAmountEl = document.getElementById('totalAmount');
+        const totalSavingsEl = document.getElementById('totalSavings');
+        const remainingBudgetEl = document.getElementById('remainingBudget');
+        const categoryLimitsContainer = document.getElementById('categoryLimitsContainer');
+
+        function updateSavingsGoal() {
+            const val = parseFloat(document.getElementById('savingsGoalInput').value) || 0;
+            savingsGoal = val;
+            categoriesConfig["ادخار وحصالة"].limit = savingsGoal;
+            localStorage.setItem('my_savings_goal_v4', savingsGoal);
+            renderUI();
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('itemName').value;
+            const price = parseFloat(document.getElementById('itemPrice').value);
+            const category = document.getElementById('itemCategory').value;
+            const date = new Date().toLocaleDateString('ar-SA', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' });
+
+            const newExpense = { id: Date.now(), name, price, category, date };
+            expenses.unshift(newExpense);
+
+            saveAndRender();
+            form.reset();
+        });
+
+        function deleteExpense(id) {
+            expenses = expenses.filter(item => item.id !== id);
+            saveAndRender();
+        }
+
+        function clearAllData() {
+            if(confirm('متأكد تبي تحذف كل السجل؟')) {
+                expenses = [];
+                saveAndRender();
+            }
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('my_custom_expenses_v4', JSON.stringify(expenses));
+            renderUI();
+        }
+
+        function renderUI() {
+            let totalSpent = 0;
+            let totalSaved = 0;
+            let catItems = {};
+
+            for (let cat in categoriesConfig) {
+                catItems[cat] = [];
+            }
+
+            expenses.forEach(item => {
+                if(item.category === "ادخار وحصالة") {
+                    totalSaved += item.price;
+                } else {
+                    totalSpent += item.price;
+                }
+                if(!catItems[item.category]) {
+                    catItems[item.category] = [];
+                }
+                catItems[item.category].push(item);
+            });
+
+            totalAmountEl.innerText = totalSpent.toFixed(2) + " ر.س";
+            totalSavingsEl.innerText = totalSaved.toFixed(2) + " ر.س";
+            
+            let remainingGeneral = 4990 - (totalSpent + totalSaved);
+            remainingBudgetEl.innerText = remainingGeneral.toFixed(2) + " ر.س";
+            if(remainingGeneral < 0) {
+                remainingBudgetEl.className = "text-xl font-bold text-red-400 mt-1";
+            } else {
+                remainingBudgetEl.className = "text-xl font-bold text-blue-400 mt-1";
+            }
+
+            categoryLimitsContainer.innerHTML = '';
+            for (let [cat, config] of Object.entries(categoriesConfig)) {
+                const itemsList = catItems[cat] || [];
+                const spent = itemsList.reduce((sum, i) => sum + i.price, 0);
+                const limit = config.limit;
+                const remainingCat = limit - spent;
+                const percentage = limit > 0 ? Math.min(Math.round((spent / limit) * 100), 100) : 0;
+                
+                let barColor = "bg-emerald-500";
+                if(cat === "ادخار وحصالة") barColor = "bg-amber-500";
+                else if (percentage > 80) barColor = "bg-amber-500";
+                if (percentage >= 100 && cat !== "ادخار وحصالة") barColor = "bg-red-500";
+
+                let itemsHtml = '';
+                if(itemsList.length === 0) {
+                    itemsHtml = `<p class="text-xs text-gray-500 italic py-2 text-center">لا توجد عمليات مسجلة في هذا القسم بعد</p>`;
+                } else {
+                    itemsHtml = `<div class="space-y-1.5 mt-2 max-h-40 overflow-y-auto pr-1">`;
+                    itemsList.forEach(subItem => {
+                        itemsHtml += `
+                            <div class="flex justify-between items-center bg-gray-800 px-3 py-1.5 rounded-lg text-xs border border-gray-700/60">
+                                <div>
+                                    <span class="text-white font-medium">${subItem.name}</span>
+                                    <span class="text-[10px] text-gray-400 mr-2">(${subItem.date})</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-emerald-400 font-bold">${subItem.price.toFixed(2)} ر.س</span>
+                                    <button onclick="deleteExpense(${subItem.id})" class="text-red-400 hover:text-red-300 bg-red-900/30 px-1.5 py-0.5 rounded text-[10px]">حذف</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    itemsHtml += `</div>`;
+                }
+
+                const card = document.createElement('div');
+                card.className = "bg-gray-900 p-4 rounded-xl border border-gray-700 space-y-3";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-semibold text-white">${config.icon} ${cat}</span>
+                        <span class="text-xs text-gray-400">الحد: ${limit} ر.س</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="${cat === 'ادخار وحصالة' ? 'text-amber-400' : 'text-emerald-400'} font-bold">${cat === 'ادخار وحصالة' ? 'وفرت' : 'صرفت'}: ${spent.toFixed(2)} ر.س</span>
+                        <span class="${remainingCat < 0 && cat !== 'ادخار وحصالة' ? 'text-red-400 font-bold' : 'text-gray-300'}">المتبقي: ${remainingCat.toFixed(2)} ر.س</span>
+                    </div>
+                    <!-- شريط التقدم -->
+                    <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                        <div class="${barColor} h-full transition-all duration-500" style="width: ${percentage}%"></div>
+                    </div>
+                    
+                    <!-- تفاصيل المنتجات والعمليات تحته -->
+                    <div class="border-t border-gray-800 pt-2 mt-2">
+                        <p class="text-[11px] text-gray-400 font-semibold mb-1">المنتجات / العمليات المسجلة:</p>
+                        ${itemsHtml}
+                    </div>
+                `;
+                categoryLimitsContainer.appendChild(card);
+            }
+        }
+
+        renderUI();
+    </script>
+</body>
+</html>
